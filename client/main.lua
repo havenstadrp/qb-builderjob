@@ -102,12 +102,12 @@ Citizen.CreateThread(function()
 
                         if TaskData.completed == TaskData.total then
                             DrawText3Ds(data.coords.x, data.coords.y, data.coords.z - 0.2, '[G] End project')
-                            if IsControlJustPressed(0, Keys["G"]) then
+                            if IsControlJustPressed(0, 47) then
                                 TriggerServerEvent('qb-builderjob:server:FinishProject')
                             end
                         end
 
-                        if IsControlJustPressed(0, Keys["E"]) then
+                        if IsControlJustPressed(0, 38) then
                             BuilderData.ShowDetails = not BuilderData.ShowDetails
                         end
                     end
@@ -122,7 +122,7 @@ Citizen.CreateThread(function()
                         DrawMarker(2, v.coords.x, v.coords.y, v.coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.3, 0.2, 55, 155, 255, 255, 0, 0, 0, 1, 0, 0, 0)
                         if TaskDistance < 1.5 then
                             DrawText3Ds(v.coords.x, v.coords.y, v.coords.z + 0.25, '[E] Complete task')
-                            if IsControlJustPressed(0, Keys["E"]) then
+                            if IsControlJustPressed(0, 38) then
                                 BuilderData.CurrentTask = k
                                 DoTask()
                             end
