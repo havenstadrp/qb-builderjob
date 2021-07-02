@@ -1,8 +1,3 @@
-QBCore = nil
-TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
-
--- Code
-
 QBCore.Functions.CreateCallback('qb-builderjob:server:GetCurrentProject', function(source, cb)
     local CurProject = nil
     for k, v in pairs(Config.Projects) do
