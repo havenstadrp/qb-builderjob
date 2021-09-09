@@ -1,5 +1,5 @@
-isLoggedIn = false
-PlayerData = {}
+local isLoggedIn = false
+local PlayerData = {}
 
 local BuilderData = {
     ShowDetails = false,
