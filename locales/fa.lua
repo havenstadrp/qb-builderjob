@@ -1,6 +1,6 @@
 local Translations = {
     info = {
-        loc1_label = 'Location 1',
+        loc1_label = 'Mantaqe 1',
         task_label = 'Chakkosh',
         details_view = '[~g~E~s~] Didan Joziia',
         exercises = 'Tamrin Ha: %{value}/%{value2}',
