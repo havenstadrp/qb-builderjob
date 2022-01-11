@@ -17,15 +17,13 @@ QBCore.Functions.CreateCallback('qb-builderjob:server:GetCurrentProject', functi
     cb(Config)
 end)
 
-RegisterServerEvent('qb-builderjob:server:SetTaskState')
-AddEventHandler('qb-builderjob:server:SetTaskState', function(Task, IsBusy, IsCompleted)
+RegisterServerEvent('qb-builderjob:server:SetTaskState', function(Task, IsBusy, IsCompleted)
     Config.Projects[Config.CurrentProject].ProjectLocations["tasks"][Task].IsBusy = IsBusy
     Config.Projects[Config.CurrentProject].ProjectLocations["tasks"][Task].completed = IsCompleted
     TriggerClientEvent('qb-builderjob:client:SetTaskState', -1, Task, IsBusy, IsCompleted)
 end)
 
-RegisterServerEvent('qb-builderjob:server:FinishProject')
-AddEventHandler('qb-builderjob:server:FinishProject', function()
+RegisterServerEvent('qb-builderjob:server:FinishProject', function()
     Config.Projects[Config.CurrentProject].IsActive = false
     for k, v in pairs(Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]) do
         v.completed = false

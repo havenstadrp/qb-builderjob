@@ -1,5 +1,4 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local isLoggedIn = false
 local PlayerData = {}
 
 local BuilderData = {
@@ -7,16 +6,19 @@ local BuilderData = {
     CurrentTask = nil,
 }
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    isLoggedIn = true
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
+    PlayerJob = PlayerData.job
     GetCurrentProject()
 end)
 
-Citizen.CreateThread(function()
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+    PlayerJob = JobInfo
+    GetCurrentProject()
+end)
+
+CreateThread(function()
     Wait(1000)
-    isLoggedIn = true
     PlayerData = QBCore.Functions.GetPlayerData()
     GetCurrentProject()
 end)
@@ -25,6 +27,19 @@ function GetCurrentProject()
     QBCore.Functions.TriggerCallback('qb-builderjob:server:GetCurrentProject', function(BuilderConfig)
         Config = BuilderConfig
     end)
+end
+
+function GetCompletedTasks()
+    local retval = {
+        completed = 0,
+        total = #Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]
+    }
+    for k, v in pairs(Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]) do
+        if v.completed then
+            retval.completed = retval.completed + 1
+        end
+    end
+    return retval
 end
 
 function DrawText3Ds(x, y, z, text)
@@ -42,20 +57,7 @@ function DrawText3Ds(x, y, z, text)
     ClearDrawOrigin()
 end
 
-function GetCompletedTasks()
-    local retval = {
-        completed = 0,
-        total = #Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]
-    }
-    for k, v in pairs(Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]) do
-        if v.completed then
-            retval.completed = retval.completed + 1
-        end
-    end
-    return retval
-end
-
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
         local ped = PlayerPedId()
         local pos = GetEntityCoords(ped)
@@ -74,22 +76,22 @@ Citizen.CreateThread(function()
                     local TaskData = GetCompletedTasks()
                     if TaskData ~= nil then
                         if not BuilderData.ShowDetails then
-                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z, '[E] Detail view')
-                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + 0.2, 'Exercises: '..TaskData.completed..' / '..TaskData.total)
+                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z, Lang:t('info.details_view'))
+                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + 0.2, Lang:t('info.exercises', {value = TaskData.completed, value2 = TaskData.total}))
                         else
-                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z, '[E] Details hide')
+                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z, Lang:t('info.details_hide'))
                             for k, v in pairs(Config.Projects[Config.CurrentProject].ProjectLocations["tasks"]) do
                                 if v.completed then
-                                    DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + OffsetZ, v.label..': Completed')
+                                    DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + OffsetZ, Lang:t('info.project_completed', {value = v.label}))
                                 else
-                                    DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + OffsetZ, v.label..': Not completed')
+                                    DrawText3Ds(data.coords.x, data.coords.y, data.coords.z + OffsetZ, Lang:t('info.project_notcompleted', {value = v.label}))
                                 end
                                 OffsetZ = OffsetZ + 0.2
                             end
                         end
 
                         if TaskData.completed == TaskData.total then
-                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z - 0.2, '[G] End project')
+                            DrawText3Ds(data.coords.x, data.coords.y, data.coords.z - 0.2, Lang:t('info.project_end'))
                             if IsControlJustPressed(0, 47) then
                                 TriggerServerEvent('qb-builderjob:server:FinishProject')
                             end
@@ -109,7 +111,7 @@ Citizen.CreateThread(function()
                         inRange = true
                         DrawMarker(2, v.coords.x, v.coords.y, v.coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.3, 0.2, 55, 155, 255, 255, 0, 0, 0, 1, 0, 0, 0)
                         if TaskDistance < 1.5 then
-                            DrawText3Ds(v.coords.x, v.coords.y, v.coords.z + 0.25, '[E] Complete task')
+                            DrawText3Ds(v.coords.x, v.coords.y, v.coords.z + 0.25, Lang:t('info.complete_task'))
                             if IsControlJustPressed(0, 38) then
                                 BuilderData.CurrentTask = k
                                 DoTask()
@@ -121,10 +123,10 @@ Citizen.CreateThread(function()
         end
 
         if not inRange then
-            Citizen.Wait(1000)
+            Wait(1000)
         end
 
-        Citizen.Wait(3)
+        Wait(3)
     end
 end)
 
@@ -138,19 +140,17 @@ function DoTask()
     if TaskData.type == "hammer" then
         while CountDown ~= 0 do
             CountDown = CountDown - 1
-            Citizen.Wait(1000)
+            Wait(1000)
         end
         TriggerServerEvent('qb-builderjob:server:SetTaskState', BuilderData.CurrentTask, true, true)
     end
 end
 
-RegisterNetEvent('qb-builderjob:client:SetTaskState')
-AddEventHandler('qb-builderjob:client:SetTaskState', function(Task, IsBusy, IsCompleted)
+RegisterNetEvent('qb-builderjob:client:SetTaskState', function(Task, IsBusy, IsCompleted)
     Config.Projects[Config.CurrentProject].ProjectLocations["tasks"][Task].IsBusy = IsBusy
     Config.Projects[Config.CurrentProject].ProjectLocations["tasks"][Task].completed = IsCompleted
 end)
 
-RegisterNetEvent('qb-builderjob:client:FinishProject')
-AddEventHandler('qb-builderjob:client:FinishProject', function(BuilderConfig)
+RegisterNetEvent('qb-builderjob:client:FinishProject', function(BuilderConfig)
     Config = BuilderConfig
 end)
