@@ -1,7 +1,7 @@
 local Translations = {
     info = {
         loc1_label = 'Ubicación 1',
-        task_label = 'Marillo',
+        task_label = 'Martillo',
         details_view = '[~g~E~s~] Ver detalles',
         exercises = 'Trabajos: %{value}/%{value2}',
         details_hide = '[~g~E~s~] Esconder detalles',
