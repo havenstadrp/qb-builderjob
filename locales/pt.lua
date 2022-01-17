@@ -8,7 +8,7 @@ local Translations = {
         project_completed = '%{value}: ~g~Feito~s~',
         project_notcompleted = '%{value}: ~r~Por Fazer~s~',
         project_end = '[~g~G~s~] Terminar Projeto',
-        complete_task = '[~g~E~s~] Terminar Tarega'
+        complete_task = '[~g~E~s~] Terminar Tarefa'
     }
 }
 
